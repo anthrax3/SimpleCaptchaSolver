@@ -13,8 +13,10 @@ namespace BrokeReality
     public partial class FormMain : Form
     {
         #region Constants
-        private Color LIGHTESTCOLOR = Color.FromArgb(255, 236, 236, 236);
+        private Color LIGHTESTBLACKCOLOR = Color.FromArgb(255, 100, 100, 100);
         private Color GRIDCOLOR = Color.FromArgb(255, 204, 204, 204);
+        private Color BLACK = Color.FromArgb(255, 0, 0, 0);
+        private Color WHITE = Color.FromArgb(255, 255, 255, 255);
         #endregion
 
         #region Members
@@ -67,21 +69,42 @@ namespace BrokeReality
                 if (imageBMP == null)
                     return;
 
+                #region Stage 0 : Keep all the pixels with GRIDCOLOR which are near the black pixels 
+                //TODO: make better algorithm
+                byte[,] colorMatrix = new byte[imageBMP.Width, imageBMP.Height];
+
+                //save the original image
+                if (File.Exists(Application.StartupPath + "\\Temp\\original.bmp"))
+                    File.Delete(Application.StartupPath + "\\Temp\\original.bmp");
+                imageBMP.Save(Application.StartupPath + "\\Temp\\original.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+
+                if (File.Exists(Application.StartupPath + "\\Temp\\stage0.bmp"))
+                    File.Delete(Application.StartupPath + "\\Temp\\stage0.bmp");
+
+                /* for (int i = 0; i < imageBMP.Width; i++)
+                    for (int j = 0; j < imageBMP.Height; j++)
+                        colorMatrix[i, j] = imageBMP.GetPixel(i, j).B;
+
+                for (int i = 0; i < imageBMP.Width; i++)
+                    for (int j = 0; j < imageBMP.Height; j++)
+                        if (colorMatrix[i,j] < LIGHTESTBLACKCOLOR.B)
+                        {
+                            List<Point>  neighbours = getValidNeighbours(i, j);
+                            neighbours.ForEach(p => imageBMP.SetPixel(p.X, p.Y, BLACK));
+                        }
+
+                imageBMP.Save(Application.StartupPath + "\\Temp\\stage0.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                pictureBoxCaptcha.Image = imageBMP; */
+                #endregion
+
                 #region Stage 1 : Remove grid
                 if (File.Exists(Application.StartupPath + "\\Temp\\stage1.bmp"))
                     File.Delete(Application.StartupPath + "\\Temp\\stage1.bmp");
 
-                if (File.Exists(Application.StartupPath + "\\Temp\\original.bmp"))
-                    File.Delete(Application.StartupPath + "\\Temp\\original.bmp");
-
-                imageBMP.Save(Application.StartupPath + "\\Temp\\original.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
-
                 for (int i = 0; i < imageBMP.Width; i++)
                     for (int j = 0; j < imageBMP.Height; j++)
-                    {
-                        if (imageBMP.GetPixel(i, j) == GRIDCOLOR) //remove grid
-                            imageBMP.SetPixel(i, j, Color.FromArgb(255, 255, 255, 255));
-                    }
+                        if (imageBMP.GetPixel(i, j) == GRIDCOLOR)
+                            imageBMP.SetPixel(i, j, WHITE);
 
                 imageBMP.Save(Application.StartupPath + "\\Temp\\stage1.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
                 pictureBoxCaptcha.Image = imageBMP;
@@ -91,13 +114,12 @@ namespace BrokeReality
                 if (File.Exists(Application.StartupPath + "\\Temp\\stage2.bmp"))
                     File.Delete(Application.StartupPath + "\\Temp\\stage2.bmp");
 
-                //change the lightest grey nuances to white
+                //change the light grey nuances to white
                 for (int i = 0; i < imageBMP.Width; i++)
                     for (int j = 0; j < imageBMP.Height; j++)
-                    {
                         if (imageBMP.GetPixel(i, j).B > Color.FromArgb(255, 108, 108, 108).B) //108, 108, 108
-                            imageBMP.SetPixel(i, j, Color.FromArgb(255, 255, 255, 255));
-                    }
+                            imageBMP.SetPixel(i, j, WHITE);
+
 
                 imageBMP.Save(Application.StartupPath + "\\Temp\\stage2.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
                 pictureBoxCaptcha.Image = imageBMP;
@@ -107,13 +129,10 @@ namespace BrokeReality
                 if (File.Exists(Application.StartupPath + "\\Temp\\stage3.bmp"))
                     File.Delete(Application.StartupPath + "\\Temp\\stage3.bmp");
 
-                Color b = imageBMP.GetPixel(0, 0);
                 for (int i = 0; i < imageBMP.Width; i++)
                     for (int j = 0; j < imageBMP.Height; j++)
-                    {
-                        if (imageBMP.GetPixel(i, j) != Color.FromArgb(255,255,255,255)) 
-                            imageBMP.SetPixel(i, j, Color.FromArgb(255,0,0,0)); //black
-                    }
+                        if (imageBMP.GetPixel(i, j) != WHITE) 
+                            imageBMP.SetPixel(i, j, BLACK);
 
                 imageBMP.Save(Application.StartupPath + "\\Temp\\stage3.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
                 pictureBoxCaptcha.Image = imageBMP;
@@ -125,6 +144,7 @@ namespace BrokeReality
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error");
+                buttonSplit.Enabled = false;
             }
         }
 
@@ -214,6 +234,7 @@ namespace BrokeReality
             }
         }
 
+        #region Useful methods
         private Point getLeftMostBlackPoint(Bitmap image)
         {
             int leftX = 0, leftY = 0;
@@ -226,7 +247,7 @@ namespace BrokeReality
                     break;
 
                 for (int y = 0; y < image.Height; y++)
-                    if (image.GetPixel(x, y) == Color.FromArgb(255, 0, 0, 0))
+                    if (image.GetPixel(x, y) == BLACK)
                     {
                         leftX = x;
                         finished = true;
@@ -242,7 +263,7 @@ namespace BrokeReality
                     break;
 
                 for (int x = 0; x < image.Width; x++)
-                    if (image.GetPixel(x, y) == Color.FromArgb(255, 0, 0, 0))
+                    if (image.GetPixel(x, y) == BLACK)
                     {
                         leftY = y;
                         finished = true;
@@ -271,7 +292,7 @@ namespace BrokeReality
                     break;
 
                 for (int y = image.Height - 1; y >= 0; y--)
-                    if (image.GetPixel(x, y) == Color.FromArgb(255, 0, 0, 0))
+                    if (image.GetPixel(x, y) == BLACK)
                     {
                         rightX = x;
                         finished = true;
@@ -287,7 +308,7 @@ namespace BrokeReality
                     break;
 
                 for (int x = image.Width - 1; x >= 0; x--)
-                    if (image.GetPixel(x, y) == Color.FromArgb(255, 0, 0, 0))
+                    if (image.GetPixel(x, y) == BLACK)
                     {
                         rightY = y;
                         finished = true;
@@ -302,5 +323,33 @@ namespace BrokeReality
             
             return new Point(rightX, rightY);
         }
+
+        //all neighbours from N-S-V-E directions which have the color lighter than the grid's color
+        private List<Point> getValidNeighbours(int x, int y)
+        {
+            List<Point> list = new List<Point>();
+            try
+            {
+                //from N
+                if (y - 1 > 0 && imageBMP.GetPixel(x, y - 1).B == GRIDCOLOR.B)
+                    list.Add(new Point(x, y - 1));
+                //from S
+                if (y + 1 < imageBMP.Height && imageBMP.GetPixel(x, y + 1).B == GRIDCOLOR.B)
+                    list.Add(new Point(x, y + 1));
+                //from V
+                if (x - 1 > 0 && imageBMP.GetPixel(x - 1, y).B == GRIDCOLOR.B)
+                    list.Add(new Point(x - 1, y));
+                //from E
+                if (x + 1 < imageBMP.Width && imageBMP.GetPixel(x + 1, y).B == GRIDCOLOR.B)
+                    list.Add(new Point(x + 1, y));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error");
+            }
+
+            return list;
+        }
+        #endregion
     }
 }
