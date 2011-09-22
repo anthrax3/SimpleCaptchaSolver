@@ -1,9 +1,0 @@
-c:\users\rbadea\documents\visual studio 2010\Projects\BrokenReality\BrokenReality\bin\Debug\BrokenReality.exe
-c:\users\rbadea\documents\visual studio 2010\Projects\BrokenReality\BrokenReality\bin\Debug\BrokenReality.pdb
-c:\users\rbadea\documents\visual studio 2010\Projects\BrokenReality\BrokenReality\obj\x86\Debug\ResolveAssemblyReference.cache
-c:\users\rbadea\documents\visual studio 2010\Projects\BrokenReality\BrokenReality\obj\x86\Debug\BrokenReality.FormMain.resources
-c:\users\rbadea\documents\visual studio 2010\Projects\BrokenReality\BrokenReality\obj\x86\Debug\BrokenReality.Properties.Resources.resources
-c:\users\rbadea\documents\visual studio 2010\Projects\BrokenReality\BrokenReality\obj\x86\Debug\GenerateResource.read.1.tlog
-c:\users\rbadea\documents\visual studio 2010\Projects\BrokenReality\BrokenReality\obj\x86\Debug\GenerateResource.write.1.tlog
-c:\users\rbadea\documents\visual studio 2010\Projects\BrokenReality\BrokenReality\obj\x86\Debug\BrokenReality.exe
-c:\users\rbadea\documents\visual studio 2010\Projects\BrokenReality\BrokenReality\obj\x86\Debug\BrokenReality.pdb
