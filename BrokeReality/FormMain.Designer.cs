@@ -35,6 +35,8 @@
             this.buttonSelect = new System.Windows.Forms.Button();
             this.buttonProcess = new System.Windows.Forms.Button();
             this.buttonSplit = new System.Windows.Forms.Button();
+            this.btnGetCaptchas = new System.Windows.Forms.Button();
+            this.checkBoxShow = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCaptcha)).BeginInit();
             this.SuspendLayout();
             // 
@@ -79,7 +81,7 @@
             // 
             // buttonProcess
             // 
-            this.buttonProcess.Location = new System.Drawing.Point(13, 85);
+            this.buttonProcess.Location = new System.Drawing.Point(13, 95);
             this.buttonProcess.Name = "buttonProcess";
             this.buttonProcess.Size = new System.Drawing.Size(75, 23);
             this.buttonProcess.TabIndex = 4;
@@ -90,7 +92,7 @@
             // buttonSplit
             // 
             this.buttonSplit.Enabled = false;
-            this.buttonSplit.Location = new System.Drawing.Point(95, 84);
+            this.buttonSplit.Location = new System.Drawing.Point(95, 94);
             this.buttonSplit.Name = "buttonSplit";
             this.buttonSplit.Size = new System.Drawing.Size(75, 23);
             this.buttonSplit.TabIndex = 5;
@@ -98,17 +100,42 @@
             this.buttonSplit.UseVisualStyleBackColor = true;
             this.buttonSplit.Click += new System.EventHandler(this.buttonSplit_Click);
             // 
+            // btnGetCaptchas
+            // 
+            this.btnGetCaptchas.Location = new System.Drawing.Point(460, 31);
+            this.btnGetCaptchas.Name = "btnGetCaptchas";
+            this.btnGetCaptchas.Size = new System.Drawing.Size(95, 23);
+            this.btnGetCaptchas.TabIndex = 6;
+            this.btnGetCaptchas.Text = "Get Captchas";
+            this.btnGetCaptchas.UseVisualStyleBackColor = true;
+            this.btnGetCaptchas.Click += new System.EventHandler(this.btnGetCaptchas_Click);
+            // 
+            // checkBoxShow
+            // 
+            this.checkBoxShow.AutoSize = true;
+            this.checkBoxShow.Location = new System.Drawing.Point(16, 66);
+            this.checkBoxShow.Name = "checkBoxShow";
+            this.checkBoxShow.Size = new System.Drawing.Size(129, 17);
+            this.checkBoxShow.TabIndex = 7;
+            this.checkBoxShow.Text = "Show letters after split";
+            this.checkBoxShow.UseVisualStyleBackColor = true;
+            this.checkBoxShow.CheckedChanged += new System.EventHandler(this.checkBoxShow_CheckedChanged);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(567, 261);
+            this.Controls.Add(this.checkBoxShow);
+            this.Controls.Add(this.btnGetCaptchas);
             this.Controls.Add(this.buttonSplit);
             this.Controls.Add(this.buttonProcess);
             this.Controls.Add(this.buttonSelect);
             this.Controls.Add(this.textBoxImage);
             this.Controls.Add(this.labelFile);
             this.Controls.Add(this.pictureBoxCaptcha);
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "FormMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "BrokenReality";
@@ -127,6 +154,8 @@
         private System.Windows.Forms.Button buttonSelect;
         private System.Windows.Forms.Button buttonProcess;
         private System.Windows.Forms.Button buttonSplit;
+        private System.Windows.Forms.Button btnGetCaptchas;
+        private System.Windows.Forms.CheckBox checkBoxShow;
     }
 }
 

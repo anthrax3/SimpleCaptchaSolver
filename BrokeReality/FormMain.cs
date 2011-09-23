@@ -12,34 +12,37 @@ namespace BrokeReality
 {
     public partial class FormMain : Form
     {
-        #region Constants
-        private Color LIGHTESTBLACKCOLOR = Color.FromArgb(255, 100, 100, 100);
-        private Color GRIDCOLOR = Color.FromArgb(255, 204, 204, 204);
-        private Color BLACK = Color.FromArgb(255, 0, 0, 0);
-        private Color WHITE = Color.FromArgb(255, 255, 255, 255);
-        #endregion
-
         #region Members
         private string imageFilePath = "";
         private string imageFileName = "";
         private Bitmap imageBMP = null;
+        private bool showLetterFolder = false;
         #endregion
 
         public FormMain()
         {
             InitializeComponent();
 
-#if DEBUG
-            openFileDialogImage.InitialDirectory = Application.StartupPath.Replace("\\bin\\Debug", "") + "\\Images";
-#else
-            openFileDialogImage.InitialDirectory = Application.StartupPath;
-#endif
-            
-            if (!Directory.Exists(Application.StartupPath + "\\Temp"))
-                Directory.CreateDirectory(Application.StartupPath + "\\Temp");
+            try
+            {
+                if (!Directory.Exists(CST.TEMP_DIR))
+                    Directory.CreateDirectory(CST.TEMP_DIR);
 
-            if (!Directory.Exists(Application.StartupPath + "\\IamgeLetters"))
-                Directory.CreateDirectory(Application.StartupPath + "\\ImageLetters");
+                if (!Directory.Exists(CST.IMAGE_LETTERS_DIR))
+                    Directory.CreateDirectory(CST.IMAGE_LETTERS_DIR);
+
+                if (!Directory.Exists(CST.LETTER_SET_DIR))
+                    Directory.CreateDirectory(CST.IMAGE_LETTERS_DIR);
+
+                if (!Directory.Exists(CST.CAPTCHAS_DIR))
+                    Directory.CreateDirectory(CST.CAPTCHAS_DIR);
+
+                openFileDialogImage.InitialDirectory = CST.CAPTCHAS_DIR;
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show(ex.Message, "Error");
+            }
         }
 
         private void buttonSelect_Click(object sender, EventArgs e)
@@ -66,20 +69,22 @@ namespace BrokeReality
         {
             try
             {
+                #region Input Validation
                 if (imageBMP == null)
                     return;
+                #endregion
 
-                #region Stage 0 : Keep all the pixels with GRIDCOLOR which are near the black pixels 
-                //TODO: make better algorithm
+                #region Stage 0 : Keep all the pixels with GRIDCOLOR which are near the black pixels
+                //TODO: make a better algorithm
                 byte[,] colorMatrix = new byte[imageBMP.Width, imageBMP.Height];
 
                 //save the original image
-                if (File.Exists(Application.StartupPath + "\\Temp\\original.bmp"))
-                    File.Delete(Application.StartupPath + "\\Temp\\original.bmp");
-                imageBMP.Save(Application.StartupPath + "\\Temp\\original.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                if (File.Exists(CST.TEMP_DIR + "\\original.bmp"))
+                    File.Delete(CST.TEMP_DIR + "\\original.bmp");
+                imageBMP.Save(CST.TEMP_DIR + "\\original.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
 
-                if (File.Exists(Application.StartupPath + "\\Temp\\stage0.bmp"))
-                    File.Delete(Application.StartupPath + "\\Temp\\stage0.bmp");
+                if (File.Exists(CST.TEMP_DIR + "\\stage0.bmp"))
+                    File.Delete(CST.TEMP_DIR + "\\stage0.bmp");
 
                 /* for (int i = 0; i < imageBMP.Width; i++)
                     for (int j = 0; j < imageBMP.Height; j++)
@@ -98,43 +103,43 @@ namespace BrokeReality
                 #endregion
 
                 #region Stage 1 : Remove grid
-                if (File.Exists(Application.StartupPath + "\\Temp\\stage1.bmp"))
-                    File.Delete(Application.StartupPath + "\\Temp\\stage1.bmp");
+                if (File.Exists(CST.TEMP_DIR + "\\stage1.bmp"))
+                    File.Delete(CST.TEMP_DIR + "\\stage1.bmp");
 
                 for (int i = 0; i < imageBMP.Width; i++)
                     for (int j = 0; j < imageBMP.Height; j++)
-                        if (imageBMP.GetPixel(i, j) == GRIDCOLOR)
-                            imageBMP.SetPixel(i, j, WHITE);
+                        if (imageBMP.GetPixel(i, j) == CST.GRIDCOLOR)
+                            imageBMP.SetPixel(i, j, CST.WHITE);
 
-                imageBMP.Save(Application.StartupPath + "\\Temp\\stage1.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                imageBMP.Save(CST.TEMP_DIR + "\\stage1.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
                 pictureBoxCaptcha.Image = imageBMP;
                 #endregion
 
                 #region Stage 2 : Make white background
-                if (File.Exists(Application.StartupPath + "\\Temp\\stage2.bmp"))
-                    File.Delete(Application.StartupPath + "\\Temp\\stage2.bmp");
+                if (File.Exists(CST.TEMP_DIR + "\\stage2.bmp"))
+                    File.Delete(CST.TEMP_DIR + "\\stage2.bmp");
 
                 //change the light grey nuances to white
                 for (int i = 0; i < imageBMP.Width; i++)
                     for (int j = 0; j < imageBMP.Height; j++)
                         if (imageBMP.GetPixel(i, j).B > Color.FromArgb(255, 108, 108, 108).B) //108, 108, 108
-                            imageBMP.SetPixel(i, j, WHITE);
+                            imageBMP.SetPixel(i, j, CST.WHITE);
 
 
-                imageBMP.Save(Application.StartupPath + "\\Temp\\stage2.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                imageBMP.Save(CST.TEMP_DIR + "\\stage2.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
                 pictureBoxCaptcha.Image = imageBMP;
                 #endregion
 
                 #region Stage 3 : Make letters black
-                if (File.Exists(Application.StartupPath + "\\Temp\\stage3.bmp"))
-                    File.Delete(Application.StartupPath + "\\Temp\\stage3.bmp");
+                if (File.Exists(CST.TEMP_DIR + "\\stage3.bmp"))
+                    File.Delete(CST.TEMP_DIR + "\\stage3.bmp");
 
                 for (int i = 0; i < imageBMP.Width; i++)
                     for (int j = 0; j < imageBMP.Height; j++)
-                        if (imageBMP.GetPixel(i, j) != WHITE) 
-                            imageBMP.SetPixel(i, j, BLACK);
+                        if (imageBMP.GetPixel(i, j) != CST.WHITE)
+                            imageBMP.SetPixel(i, j, CST.BLACK);
 
-                imageBMP.Save(Application.StartupPath + "\\Temp\\stage3.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                imageBMP.Save(CST.TEMP_DIR + "\\stage3.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
                 pictureBoxCaptcha.Image = imageBMP;
                 #endregion
 
@@ -152,14 +157,14 @@ namespace BrokeReality
         {
             try
             {
-                if (!File.Exists(Application.StartupPath + "\\Temp\\stage3.bmp"))
+                if (!File.Exists(CST.TEMP_DIR + "\\stage3.bmp"))
                 {
                     MessageBox.Show("The image must be processed first", "Error");
                     buttonSplit.Enabled = false;
                     return;
                 }
 
-                imageBMP = new Bitmap(Application.StartupPath + "\\Temp\\stage3.bmp");
+                imageBMP = new Bitmap(CST.TEMP_DIR + "\\stage3.bmp");
                 int lenLetters = imageBMP.Width / 3;
                 Bitmap letter1 = new Bitmap(lenLetters, imageBMP.Height);
                 Bitmap letter2 = new Bitmap(lenLetters, imageBMP.Height);
@@ -206,26 +211,29 @@ namespace BrokeReality
                 #endregion
 
                 #region Save the letters to images
-                if (File.Exists(Application.StartupPath + "\\ImageLetters\\letter1.bmp"))
-                    File.Delete(Application.StartupPath + "\\ImageLetters\\letter1.bmp");
+                if (File.Exists(CST.IMAGE_LETTERS_DIR + "\\letter1.bmp"))
+                    File.Delete(CST.IMAGE_LETTERS_DIR + "\\letter1.bmp");
 
-                if (File.Exists(Application.StartupPath + "\\ImageLetters\\letter2.bmp"))
-                    File.Delete(Application.StartupPath + "\\ImageLetters\\letter2.bmp");
+                if (File.Exists(CST.IMAGE_LETTERS_DIR + "\\letter2.bmp"))
+                    File.Delete(CST.IMAGE_LETTERS_DIR + "\\letter2.bmp");
 
-                if (File.Exists(Application.StartupPath + "\\ImageLetters\\letter3.bmp"))
-                    File.Delete(Application.StartupPath + "\\ImageLetters\\letter3.bmp");
+                if (File.Exists(CST.IMAGE_LETTERS_DIR + "\\letter3.bmp"))
+                    File.Delete(CST.IMAGE_LETTERS_DIR + "\\letter3.bmp");
 
-                letter1_trimed.Save(Application.StartupPath + "\\ImageLetters\\letter1.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
-                letter2_trimed.Save(Application.StartupPath + "\\ImageLetters\\letter2.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
-                letter3_trimed.Save(Application.StartupPath + "\\ImageLetters\\letter3.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                letter1_trimed.Save(CST.IMAGE_LETTERS_DIR + "\\letter1.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                letter2_trimed.Save(CST.IMAGE_LETTERS_DIR + "\\letter2.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                letter3_trimed.Save(CST.IMAGE_LETTERS_DIR + "\\letter3.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
                 #endregion
 
                 imageBMP.Dispose();
                 MessageBox.Show("Succesfully finished", "Message", MessageBoxButtons.OK);
 
                 #region Open folder location
-                string argument = "/select, " + Application.StartupPath + "\\ImageLetters\\letter1.bmp";
-                System.Diagnostics.Process.Start("explorer.exe", argument);
+                if (showLetterFolder)
+                {
+                    string argument = "/select, " + CST.IMAGE_LETTERS_DIR + "\\letter1.bmp";
+                    System.Diagnostics.Process.Start("explorer.exe", argument);
+                }
                 #endregion
             }
             catch (Exception ex)
@@ -247,7 +255,7 @@ namespace BrokeReality
                     break;
 
                 for (int y = 0; y < image.Height; y++)
-                    if (image.GetPixel(x, y) == BLACK)
+                    if (image.GetPixel(x, y) == CST.BLACK)
                     {
                         leftX = x;
                         finished = true;
@@ -263,7 +271,7 @@ namespace BrokeReality
                     break;
 
                 for (int x = 0; x < image.Width; x++)
-                    if (image.GetPixel(x, y) == BLACK)
+                    if (image.GetPixel(x, y) == CST.BLACK)
                     {
                         leftY = y;
                         finished = true;
@@ -292,7 +300,7 @@ namespace BrokeReality
                     break;
 
                 for (int y = image.Height - 1; y >= 0; y--)
-                    if (image.GetPixel(x, y) == BLACK)
+                    if (image.GetPixel(x, y) == CST.BLACK)
                     {
                         rightX = x;
                         finished = true;
@@ -308,7 +316,7 @@ namespace BrokeReality
                     break;
 
                 for (int x = image.Width - 1; x >= 0; x--)
-                    if (image.GetPixel(x, y) == BLACK)
+                    if (image.GetPixel(x, y) == CST.BLACK)
                     {
                         rightY = y;
                         finished = true;
@@ -331,16 +339,16 @@ namespace BrokeReality
             try
             {
                 //from N
-                if (y - 1 > 0 && imageBMP.GetPixel(x, y - 1).B == GRIDCOLOR.B)
+                if (y - 1 > 0 && imageBMP.GetPixel(x, y - 1).B == CST.GRIDCOLOR.B)
                     list.Add(new Point(x, y - 1));
                 //from S
-                if (y + 1 < imageBMP.Height && imageBMP.GetPixel(x, y + 1).B == GRIDCOLOR.B)
+                if (y + 1 < imageBMP.Height && imageBMP.GetPixel(x, y + 1).B == CST.GRIDCOLOR.B)
                     list.Add(new Point(x, y + 1));
                 //from V
-                if (x - 1 > 0 && imageBMP.GetPixel(x - 1, y).B == GRIDCOLOR.B)
+                if (x - 1 > 0 && imageBMP.GetPixel(x - 1, y).B == CST.GRIDCOLOR.B)
                     list.Add(new Point(x - 1, y));
                 //from E
-                if (x + 1 < imageBMP.Width && imageBMP.GetPixel(x + 1, y).B == GRIDCOLOR.B)
+                if (x + 1 < imageBMP.Width && imageBMP.GetPixel(x + 1, y).B == CST.GRIDCOLOR.B)
                     list.Add(new Point(x + 1, y));
             }
             catch (Exception ex)
@@ -349,6 +357,18 @@ namespace BrokeReality
             }
 
             return list;
+        }
+        #endregion
+
+        #region Events
+        private void btnGetCaptchas_Click(object sender, EventArgs e)
+        {
+            new FormGetCaptchas().ShowDialog();
+        }
+
+        private void checkBoxShow_CheckedChanged(object sender, EventArgs e)
+        {
+            showLetterFolder = checkBoxShow.Checked;
         }
         #endregion
     }
