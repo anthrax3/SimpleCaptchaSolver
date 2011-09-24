@@ -33,6 +33,7 @@
             this.textBoxNrImages = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btnStart = new System.Windows.Forms.Button();
+            this.progressBarCaptchas = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
             // labelAddress
@@ -79,11 +80,19 @@
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
             // 
+            // progressBarCaptchas
+            // 
+            this.progressBarCaptchas.Location = new System.Drawing.Point(12, 94);
+            this.progressBarCaptchas.Name = "progressBarCaptchas";
+            this.progressBarCaptchas.Size = new System.Drawing.Size(211, 23);
+            this.progressBarCaptchas.TabIndex = 5;
+            // 
             // FormGetCaptchas
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(437, 136);
+            this.Controls.Add(this.progressBarCaptchas);
             this.Controls.Add(this.btnStart);
             this.Controls.Add(this.textBoxNrImages);
             this.Controls.Add(this.label1);
@@ -107,6 +116,7 @@
         private System.Windows.Forms.TextBox textBoxNrImages;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnStart;
+        private System.Windows.Forms.ProgressBar progressBarCaptchas;
     }
 }
 

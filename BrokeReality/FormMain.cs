@@ -16,7 +16,11 @@ namespace BrokeReality
         private string imageFilePath = "";
         private string imageFileName = "";
         private Bitmap imageBMP = null;
+
         private bool showLetterFolder = false;
+        private bool saveInLetterSet = false;
+
+        private bool[] savingLetters = new bool[]{false, false, false};
         #endregion
 
         public FormMain()
@@ -32,12 +36,16 @@ namespace BrokeReality
                     Directory.CreateDirectory(CST.IMAGE_LETTERS_DIR);
 
                 if (!Directory.Exists(CST.LETTER_SET_DIR))
-                    Directory.CreateDirectory(CST.IMAGE_LETTERS_DIR);
+                    Directory.CreateDirectory(CST.LETTER_SET_DIR);
 
                 if (!Directory.Exists(CST.CAPTCHAS_DIR))
                     Directory.CreateDirectory(CST.CAPTCHAS_DIR);
 
                 openFileDialogImage.InitialDirectory = CST.CAPTCHAS_DIR;
+
+                labelLetter1.Visible = false;
+                labelLetter2.Visible = false;
+                labelLetter3.Visible = false;
             }
             catch (Exception ex) 
             {
@@ -165,64 +173,57 @@ namespace BrokeReality
                 }
 
                 imageBMP = new Bitmap(CST.TEMP_DIR + "\\stage3.bmp");
-                int lenLetters = imageBMP.Width / 3;
-                Bitmap letter1 = new Bitmap(lenLetters, imageBMP.Height);
-                Bitmap letter2 = new Bitmap(lenLetters, imageBMP.Height);
-                Bitmap letter3 = new Bitmap(lenLetters + imageBMP.Width % 3, imageBMP.Height);
+                int lenLetters = imageBMP.Width / CST.NR_LETTERS;
+                Bitmap[] letters = new Bitmap[CST.NR_LETTERS];
 
-                #region Split image in 3 letters
-                for (int i = 0; i < letter1.Width; i++)
-                    for (int j = 0; j < imageBMP.Height; j++)
-                        letter1.SetPixel(i, j, imageBMP.GetPixel(i, j));
+                for (int i = 0; i < CST.NR_LETTERS - 1; i++)
+                {
+                    letters[i] = new Bitmap(lenLetters, imageBMP.Height);
+                }
 
-                for (int i = 0; i < letter2.Width; i++)
-                    for (int j = 0; j < imageBMP.Height; j++)
-                        letter2.SetPixel(i, j, imageBMP.GetPixel(i + lenLetters, j));
+                letters[CST.NR_LETTERS - 1] = new Bitmap(lenLetters + imageBMP.Width % CST.NR_LETTERS, imageBMP.Height);
 
-                for (int i = 0; i < letter3.Width; i++)
-                    for (int j = 0; j < imageBMP.Height; j++)
-                        letter3.SetPixel(i, j, imageBMP.GetPixel(i + 2 * lenLetters, j));
+                #region Split image in letters
+                for (int k = 0; k < CST.NR_LETTERS; k++)
+                    for (int i = 0; i < letters[k].Width; i++)
+                        for (int j = 0; j < imageBMP.Height; j++)
+                            letters[k].SetPixel(i, j, imageBMP.GetPixel(i + k * lenLetters, j));
                 #endregion
 
                 #region Crop useless white regions
-                Point leftTop = getLeftMostBlackPoint(letter1);
-                Point rightBottom = getRightMostBlackPoint(letter1);
-                Bitmap letter1_trimed = new Bitmap(rightBottom.X - leftTop.X, rightBottom.Y - leftTop.Y);
+                Bitmap[] letters_trimed = new Bitmap[CST.NR_LETTERS];
 
-                for (int i = 0; i < letter1_trimed.Width; i++)
-                    for (int j = 0; j < letter1_trimed.Height; j++)
-                        letter1_trimed.SetPixel(i, j, letter1.GetPixel(i + leftTop.X, j + leftTop.Y));
+                for (int k = 0; k < CST.NR_LETTERS; k++)
+                {
+                    Point leftTop = getLeftMostBlackPoint(letters[k]);
+                    Point rightBottom = getRightMostBlackPoint(letters[k]);
+                    letters_trimed[k] = new Bitmap(rightBottom.X - leftTop.X, rightBottom.Y - leftTop.Y);
 
-                leftTop = getLeftMostBlackPoint(letter2);
-                rightBottom = getRightMostBlackPoint(letter2);
-                Bitmap letter2_trimed = new Bitmap(rightBottom.X - leftTop.X, rightBottom.Y - leftTop.Y);
-
-                for (int i = 0; i < letter2_trimed.Width; i++)
-                    for (int j = 0; j < letter2_trimed.Height; j++)
-                        letter2_trimed.SetPixel(i, j, letter2.GetPixel(i + leftTop.X, j + leftTop.Y));
-
-                leftTop = getLeftMostBlackPoint(letter3);
-                rightBottom = getRightMostBlackPoint(letter3);
-                Bitmap letter3_trimed = new Bitmap(rightBottom.X - leftTop.X, rightBottom.Y - leftTop.Y);
-
-                for (int i = 0; i < letter3_trimed.Width; i++)
-                    for (int j = 0; j < letter3_trimed.Height; j++)
-                        letter3_trimed.SetPixel(i, j, letter3.GetPixel(i + leftTop.X, j + leftTop.Y));
+                    for (int i = 0; i < letters_trimed[k].Width; i++)
+                        for (int j = 0; j < letters_trimed[k].Height; j++)
+                            letters_trimed[k].SetPixel(i, j, letters[k].GetPixel(i + leftTop.X, j + leftTop.Y));
+                }
                 #endregion
 
                 #region Save the letters to images
-                if (File.Exists(CST.IMAGE_LETTERS_DIR + "\\letter1.bmp"))
-                    File.Delete(CST.IMAGE_LETTERS_DIR + "\\letter1.bmp");
+                if (saveInLetterSet)
+                {
+                    for (int i = 0; i < savingLetters.Length; i++)
+                    {
+                        if (savingLetters[i])
+                            (new FormSetLetter(letters[i])).ShowDialog();
+                    }
+                }
+                else
+                {
+                    for (int k = 0; k < CST.NR_LETTERS; k++)
+                    {
+                        if (File.Exists(CST.IMAGE_LETTERS_DIR + "\\letter" + (k+1) + ".bmp"))
+                            File.Delete(CST.IMAGE_LETTERS_DIR + "\\letter" + (k+1) + ".bmp");
 
-                if (File.Exists(CST.IMAGE_LETTERS_DIR + "\\letter2.bmp"))
-                    File.Delete(CST.IMAGE_LETTERS_DIR + "\\letter2.bmp");
-
-                if (File.Exists(CST.IMAGE_LETTERS_DIR + "\\letter3.bmp"))
-                    File.Delete(CST.IMAGE_LETTERS_DIR + "\\letter3.bmp");
-
-                letter1_trimed.Save(CST.IMAGE_LETTERS_DIR + "\\letter1.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
-                letter2_trimed.Save(CST.IMAGE_LETTERS_DIR + "\\letter2.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
-                letter3_trimed.Save(CST.IMAGE_LETTERS_DIR + "\\letter3.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                        letters_trimed[k].Save(CST.IMAGE_LETTERS_DIR + "\\letter" + (k+1) + ".bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                    }
+                }
                 #endregion
 
                 imageBMP.Dispose();
@@ -369,6 +370,72 @@ namespace BrokeReality
         private void checkBoxShow_CheckedChanged(object sender, EventArgs e)
         {
             showLetterFolder = checkBoxShow.Checked;
+        }
+
+        private void checkBoxLetterSet_CheckedChanged(object sender, EventArgs e)
+        {
+            saveInLetterSet = checkBoxLetterSet.Checked;
+
+            labelLetter1.Visible = saveInLetterSet;
+            labelLetter2.Visible = saveInLetterSet;
+            labelLetter3.Visible = saveInLetterSet;
+        }
+
+        private void labelLetter1_Click(object sender, EventArgs e)
+        {
+            if (labelLetter1.BorderStyle == BorderStyle.None)
+            {
+                labelLetter1.BorderStyle = BorderStyle.Fixed3D;
+                savingLetters[0] = true;
+            }
+            else
+            {
+                labelLetter1.BorderStyle = BorderStyle.None;
+                savingLetters[0] = false;
+            }
+        }
+
+        private void labelLetter2_Click(object sender, EventArgs e)
+        {
+            if (labelLetter2.BorderStyle == BorderStyle.None)
+            {
+                labelLetter2.BorderStyle = BorderStyle.Fixed3D;
+                savingLetters[1] = true;
+            }
+            else
+            {
+                labelLetter2.BorderStyle = BorderStyle.None;
+                savingLetters[1] = false;
+            }
+        }
+
+        private void labelLetter3_Click(object sender, EventArgs e)
+        {
+            if (labelLetter3.BorderStyle == BorderStyle.None)
+            {
+                labelLetter3.BorderStyle = BorderStyle.Fixed3D;
+                savingLetters[2] = true;
+            }
+            else
+            {
+                labelLetter3.BorderStyle = BorderStyle.None;
+                savingLetters[2] = false;
+            }
+        }
+
+        private void buttonDelete_Click(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(CST.CAPTCHAS_DIR))
+                return;
+
+            try
+            {
+                Array.ForEach(Directory.GetFiles(CST.CAPTCHAS_DIR), file => File.Delete(file));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error");
+            }
         }
         #endregion
     }

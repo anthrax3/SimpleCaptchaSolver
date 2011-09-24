@@ -14,12 +14,19 @@ namespace BrokeReality
 {
     public partial class FormGetCaptchas : Form
     {
-        Regex regexValidAddress = new Regex(@"(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?");
-        Regex regexValidNumber = new Regex("[0-9]*");
+        private Regex regexValidAddress = new Regex(@"(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?");
+        private Regex regexValidNumber = new Regex("[0-9]*");
 
         public FormGetCaptchas()
         {
             InitializeComponent();
+        }
+
+        #region Events
+        private void FormGetCaptchas_Load(object sender, EventArgs e)
+        {
+            if (Settings.Default["Address"] != null && Settings.Default["Address"].ToString() != "")
+                textBoxAddress.Text = Settings.Default["Address"].ToString();
         }
 
         private void btnStart_Click(object sender, EventArgs e)
@@ -35,17 +42,20 @@ namespace BrokeReality
                     throw new Exception("Invalid number");
                 #endregion
 
-                //save last address
+                //save last address as default
                 Settings.Default["Address"] = textBoxAddress.Text;
                 Settings.Default.Save();
 
                 //download captchas
+                progressBarCaptchas.Maximum = nrImages;
+                progressBarCaptchas.Minimum = 0;
                 for (int i = 0; i < nrImages; i++)
                 {
                     Image captcha = DownloadImage(textBoxAddress.Text);
 
                     if(captcha != null)
                         captcha.Save(CST.CAPTCHAS_DIR + "\\captcha" + nextNumber(CST.CAPTCHAS_DIR).ToString() + ".bmp");
+                    progressBarCaptchas.Value++;
                 }
             }
             catch (Exception ex)
@@ -55,7 +65,9 @@ namespace BrokeReality
 
             this.Dispose();
         }
+        #endregion
 
+        #region Methods
         /// <summary>
         /// Function to download Image from website
         /// http://www.digitalcoding.com/Code-Snippets/C-Sharp/C-Code-Snippet-Download-Image-from-URL.html
@@ -100,7 +112,7 @@ namespace BrokeReality
             return _tmpImage;
         }
 
-
+        //function used to calculate the next valid number for a captcha's file name (captcha<X>.bmp)
         private int nextNumber(string folder)
         {
             int nr = -1, tmp;
@@ -133,11 +145,6 @@ namespace BrokeReality
                 return -1;
             }
         }
-
-        private void FormGetCaptchas_Load(object sender, EventArgs e)
-        {
-            if (Settings.Default["Address"] != null && Settings.Default["Address"].ToString() != "")
-                textBoxAddress.Text = Settings.Default["Address"].ToString();
-        }
     }
+        #endregion
 }
