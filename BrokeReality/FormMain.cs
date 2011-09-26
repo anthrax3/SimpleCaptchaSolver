@@ -191,17 +191,17 @@ namespace BrokeReality
                 #endregion
 
                 #region Crop useless white regions
-                Bitmap[] letters_trimed = new Bitmap[CST.NR_LETTERS];
+                Bitmap[] letters_trimmed = new Bitmap[CST.NR_LETTERS];
 
                 for (int k = 0; k < CST.NR_LETTERS; k++)
                 {
                     Point leftTop = getLeftMostBlackPoint(letters[k]);
                     Point rightBottom = getRightMostBlackPoint(letters[k]);
-                    letters_trimed[k] = new Bitmap(rightBottom.X - leftTop.X, rightBottom.Y - leftTop.Y);
+                    letters_trimmed[k] = new Bitmap(rightBottom.X - leftTop.X, rightBottom.Y - leftTop.Y);
 
-                    for (int i = 0; i < letters_trimed[k].Width; i++)
-                        for (int j = 0; j < letters_trimed[k].Height; j++)
-                            letters_trimed[k].SetPixel(i, j, letters[k].GetPixel(i + leftTop.X, j + leftTop.Y));
+                    for (int i = 0; i < letters_trimmed[k].Width; i++)
+                        for (int j = 0; j < letters_trimmed[k].Height; j++)
+                            letters_trimmed[k].SetPixel(i, j, letters[k].GetPixel(i + leftTop.X, j + leftTop.Y));
                 }
                 #endregion
 
@@ -221,7 +221,7 @@ namespace BrokeReality
                         if (File.Exists(CST.IMAGE_LETTERS_DIR + "\\letter" + (k+1) + ".bmp"))
                             File.Delete(CST.IMAGE_LETTERS_DIR + "\\letter" + (k+1) + ".bmp");
 
-                        letters_trimed[k].Save(CST.IMAGE_LETTERS_DIR + "\\letter" + (k+1) + ".bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                        letters_trimmed[k].Save(CST.IMAGE_LETTERS_DIR + "\\letter" + (k+1) + ".bmp", System.Drawing.Imaging.ImageFormat.Bmp);
                     }
                 }
                 #endregion
@@ -280,11 +280,11 @@ namespace BrokeReality
                     }
             }
 
-         /*   if (leftX > 0)
+            if (leftX > 0)
                 leftX--;
             if (leftY > 0)
                 leftY--;
-            */
+
             return new Point(leftX, leftY);
         }
 
